@@ -7,6 +7,7 @@ public class NGram implements Comparable<NGram> {
 	private final int count;
 	private final int conditionalCount;
 	private final double logProb;
+	private final double prob;
 	private final int size;
 
 	public NGram(String gram, int size, int count, int conditionalCount) {
@@ -14,7 +15,9 @@ public class NGram implements Comparable<NGram> {
 		this.count = count;
 		this.size = size;
 		this.conditionalCount = conditionalCount;
-		this.logProb = Math.log10((double) count / (double) conditionalCount);
+		this.prob = (double) count / (double) conditionalCount;
+		this.logProb = Math.log10(prob);
+
 	}
 
 	public NGram(String gram, int size, double logProb) {
@@ -23,6 +26,7 @@ public class NGram implements Comparable<NGram> {
 		this.count = -1;
 		this.conditionalCount = -1;
 		this.logProb = logProb;
+		this.prob = Math.pow(10, logProb);
 	}
 
 	public String getGram() {
@@ -39,6 +43,10 @@ public class NGram implements Comparable<NGram> {
 
 	public double getLogProb() {
 		return logProb;
+	}
+
+	public double getProb() {
+		return prob;
 	}
 
 	public String toString() {

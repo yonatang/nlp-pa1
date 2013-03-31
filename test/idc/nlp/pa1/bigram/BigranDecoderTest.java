@@ -21,7 +21,7 @@ public class BigranDecoderTest {
 	private void setup() throws IOException, ParseException {
 		try (InputStream ngramStream = Utils.getStream(this, "bigram-ns-test.gram");
 				InputStream lexStream = Utils.getStream(this, "bigram-ns-test.lex");) {
-			nsNgrams = new NGrams(ngramStream);
+			nsNgrams = new NGrams(ngramStream, false);
 			nsEmissions = new PosEmissions(lexStream, false);
 		}
 	}

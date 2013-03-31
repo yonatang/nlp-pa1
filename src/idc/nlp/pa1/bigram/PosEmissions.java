@@ -23,6 +23,8 @@ import com.google.common.collect.Maps;
 
 public class PosEmissions {
 
+	static final String UNKNOWN_SEG = "UNK";
+
 	private final SortedMap<String, PosEmission> emissions = new TreeMap<>();
 	private final boolean smoothing;
 
@@ -50,8 +52,11 @@ public class PosEmissions {
 	public double getLogProb(String seg, String pos) {
 		if (!emissions.containsKey(seg)) {
 			// Word has not seen
-			// TODO Smoothing
-			return Double.NEGATIVE_INFINITY;
+			if (smoothing) {
+				seg = UNKNOWN_SEG;
+			} else {
+				return Double.NEGATIVE_INFINITY;
+			}
 		}
 		PosEmission emission = emissions.get(seg);
 		if (!emission.getPosToLogProb().containsKey(pos)) {
@@ -60,10 +65,6 @@ public class PosEmissions {
 			return Double.NEGATIVE_INFINITY;
 		}
 		return emission.getPosToLogProb().get(pos);
-	}
-
-	public boolean isKnownSeg(String seg) {
-		return emissions.containsKey(seg);
 	}
 
 	public void exportEmissions(OutputStream os) {

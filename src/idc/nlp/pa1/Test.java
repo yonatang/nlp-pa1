@@ -2,17 +2,12 @@ package idc.nlp.pa1;
 
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.Sets;
 import com.google.common.collect.TreeMultiset;
 
 public class Test {
@@ -34,6 +29,7 @@ public class Test {
 		ms.add(3);
 		ms.add(1);
 		
+		System.out.println(ms.size());
 		
 		System.out.println(ms);
 		ms2.addAll(ms);

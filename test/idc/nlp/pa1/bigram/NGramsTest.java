@@ -2,11 +2,9 @@ package idc.nlp.pa1.bigram;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.text.ParseException;
 import java.util.Arrays;
 
-import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.io.output.WriterOutputStream;
 import org.testng.Assert;
@@ -17,8 +15,8 @@ import com.google.common.base.Splitter;
 @Test
 public class NGramsTest {
 
-	public void testCreateAndRead() throws IOException, ParseException {
-		NGramsCreator ngc = new NGramsCreator(3);
+	public void testCreateAndReadNs() throws IOException, ParseException {
+		NGramsCreator ngc = new NGramsCreator(3, false);
 		ngc.addSentence(Arrays.asList("a", "b", "c", "d"));
 		ngc.addSentence(Arrays.asList("a", "b", "e", "a"));
 		NGrams ng = ngc.create();
@@ -27,7 +25,7 @@ public class NGramsTest {
 		ng.exportNGrams(wos);
 
 		try (InputStream is = this.getClass().getResourceAsStream("abcd-abea.gram");) {
-			NGrams expectedNg = new NGrams(is);
+			NGrams expectedNg = new NGrams(is, false);
 			for (Integer i : expectedNg.getNGramSizes()) {
 				for (String ngram : expectedNg.getNgrams(i)) {
 					Iterable<String> iter = Splitter.on(' ').split(ngram);
@@ -47,12 +45,12 @@ public class NGramsTest {
 			}
 		}
 	}
-	
-	public void testCase1(){
-		NGramsCreator ngc = new NGramsCreator(2);
+
+	public void testCase1() {
+		NGramsCreator ngc = new NGramsCreator(2, false);
 		ngc.addSentence(Arrays.asList("yyQUOT", "VB", "NN", "CC", "RB", "yyDOT"));
-		NGrams ng=ngc.create();
-		System.out.println(ng.getLogProb(Arrays.asList("RB","yyDOT")));
-		
+		NGrams ng = ngc.create();
+		System.out.println(ng.getLogProb(Arrays.asList("RB", "yyDOT")));
+
 	}
 }

@@ -16,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.xml.sax.ext.LexicalHandler;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -28,11 +27,13 @@ public class BigramTrainerTest {
 	InputStream trainInput;
 	InputStream lexStream;
 	InputStream gramStream;
+	InputStream lexSmoothedStream;
 
 	@BeforeMethod
 	void setup() {
 		trainInput = Utils.getStream(this, "bigram-test.train");
 		lexStream = Utils.getStream(this, "bigram-ns-test.lex");
+		lexSmoothedStream = Utils.getStream(this, "bigram-s-test.lex");
 		gramStream = Utils.getStream(this, "bigram-ns-test.gram");
 	}
 
@@ -58,8 +59,7 @@ public class BigramTrainerTest {
 				ByteArrayOutputStream gram = new ByteArrayOutputStream();) {
 			BigramTrainer bt = new BigramTrainer(trainInput, true, lex, gram);
 			bt.train();
-			// assertEquals(lex.toString().trim(),
-			// IOUtils.toString(lexStream).trim());
+			assertEquals(lex.toString().trim(), IOUtils.toString(lexSmoothedStream).trim());
 			// assertEquals(gram.toString().trim(),
 			// IOUtils.toString(gramStream).trim());
 		}
@@ -81,7 +81,7 @@ public class BigramTrainerTest {
 	}
 
 	public void testGram() throws ParseException, IOException {
-		NGrams grams = new NGrams(gramStream);
+		NGrams grams = new NGrams(gramStream,false);
 		Map<Integer, Integer> dataTest = ImmutableMap.<Integer, Integer> of(1, 5, 2, 7);
 		Map<String, Double> gram1 = ImmutableMap.<String, Double> of(//
 				"AUX", -1.0791812460476249d,//

@@ -18,11 +18,13 @@ import static idc.nlp.pa1.bigram.NGrams.*;
 
 public class NGramsCreator {
 
-	public NGramsCreator(int n) {
+	public NGramsCreator(int n, boolean smoothing) {
 		this.N = n;
+		this.smoothing = smoothing;
 	}
 
 	private final int N;
+	private final boolean smoothing;
 	private final Multiset<String> allGrams = HashMultiset.create();
 	private final Multiset<Integer> gramCount = HashMultiset.create();
 	private int unigramsCount = 0;
@@ -101,6 +103,6 @@ public class NGramsCreator {
 			}
 			groupBySize.put(gramSize, new NGram(gram, gramSize, count, conditionalCount));
 		}
-		return new NGrams(groupBySize, gramCount);
+		return new NGrams(groupBySize, gramCount, smoothing);
 	}
 }

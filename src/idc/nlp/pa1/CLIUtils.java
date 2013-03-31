@@ -2,7 +2,6 @@ package idc.nlp.pa1;
 
 import java.io.File;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 public class CLIUtils {
@@ -40,7 +39,6 @@ public class CLIUtils {
 
 	public static File setExtenstion(File file, String ext) {
 		String oldExt = FilenameUtils.getExtension(file.getName());
-		String newExt;
 		if (oldExt.isEmpty()) {
 			ext = "." + ext;
 		}

@@ -111,7 +111,7 @@ public class BigramDecoder extends AbstractDecoder {
 			}
 			if (allAreZero) {
 				// If we cannot make a useful estimate about the next to
-				logger.debug("Didn't find any option for " + firstSeg + ". Tagging it as NN");
+				logger.info("Didn't find any option for " + firstSeg + ". Tagging it as NN");
 				v0.put("NN", 0d);
 			}
 		}
@@ -125,9 +125,6 @@ public class BigramDecoder extends AbstractDecoder {
 			String seg = segments.get(i);
 			logger.info("### Analyizing " + seg);
 
-			if (!emissions.isKnownSeg(seg)) {
-
-			}
 			boolean allAreZero = true;
 			for (String pos : posSet) {
 				MaxPosFinder mpf = argmax(v.get(i - 1), pos, seg);
@@ -138,7 +135,7 @@ public class BigramDecoder extends AbstractDecoder {
 			}
 			if (allAreZero) {
 				// If we cannot make a useful estimate about the next to
-				logger.debug("Didn't find any option for " + seg + ". Tagging it as NN");
+				logger.info("Didn't find any option for " + seg + ". Tagging it as NN");
 				MaxPosFinder mpfNoNGram = new MaxPosFinder();
 				MaxPosFinder mpfWithNGram = new MaxPosFinder();
 				for (Entry<String, Double> e : v.get(i - 1).entrySet()) {
@@ -147,7 +144,8 @@ public class BigramDecoder extends AbstractDecoder {
 				}
 				currentV.put("NN", 0d);
 				if (Double.isInfinite(mpfWithNGram.maxPosLogProb)) {
-					// in rare cases this might improve results, when P[S'] >> P[S|S']
+					// in rare cases this might improve results, when P[S'] >>
+					// P[S|S']
 					currentB.put("NN", mpfWithNGram.maxPos);
 				} else {
 					currentB.put("NN", mpfNoNGram.maxPos);

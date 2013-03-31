@@ -2,7 +2,6 @@ package idc.nlp.pa1.runner;
 
 import idc.nlp.pa1.AbstractTrainer;
 import idc.nlp.pa1.CLIUtils;
-import idc.nlp.pa1.Model;
 import idc.nlp.pa1.baseline.BaselineTrainer;
 import idc.nlp.pa1.bigram.BigramTrainer;
 
@@ -10,23 +9,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.apache.commons.io.FilenameUtils;
-
 public class TrainerRunner {
 
-	public TrainerRunner(File trainFile, Model model) {
-
-	}
-
-	/**
-	 * @param args
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 */
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 		int model = CLIUtils.parseArgInt(args, 0);
 		File file = CLIUtils.parseArgFile(args, 1);
-
+		boolean smoothing = CLIUtils.parseArgBool(args, 2, true);
 		AbstractTrainer trainer;
 		switch (model) {
 		case 0:
@@ -36,12 +24,13 @@ public class TrainerRunner {
 		case 2:
 			File lexFile = CLIUtils.setExtenstion(file, "lex");
 			File gramFile = CLIUtils.setExtenstion(file, "gram");
-			trainer = new BigramTrainer(file, false, lexFile, gramFile);
+			trainer = new BigramTrainer(file, smoothing, lexFile, gramFile);
 			break;
 
 		default:
 			throw new IllegalStateException("Cannot find trainer for " + model);
 		}
+		System.out.println(String.format("Training model %d with%s smoothing...", model, (!smoothing ? "out" : "")));
 		long startTime = System.currentTimeMillis();
 		trainer.train();
 		long duration = System.currentTimeMillis() - startTime;

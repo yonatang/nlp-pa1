@@ -23,6 +23,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultiset;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
@@ -31,11 +33,17 @@ public class NGrams {
 	public static final String START = "_START_";
 	public static final String END = "_END_";
 
+	private static final Map<Integer, List<Double>> metaparams = ImmutableMap.<Integer, List<Double>> builder()
+			.put(1, ImmutableList.of(1d)) //
+			.put(2, ImmutableList.of(0.01d, 0.99d))//
+			.put(3, ImmutableList.of(0.1d, 0.3d, 0.6d))//
+			.build();
+	private final boolean smoothing;
 	private SortedMap<Integer, SortedMap<String, NGram>> data = new TreeMap<>();
 
 	private Multiset<Integer> ngramCounts = HashMultiset.create();
 
-	NGrams(Multimap<Integer, NGram> inData, Multiset<Integer> ngramCounts) {
+	NGrams(Multimap<Integer, NGram> inData, Multiset<Integer> ngramCounts, boolean smoothing) {
 		Preconditions.checkNotNull(inData);
 		Preconditions.checkNotNull(ngramCounts);
 		for (Map.Entry<Integer, NGram> e : inData.entries()) {
@@ -46,20 +54,23 @@ public class NGrams {
 			data.get(e.getKey()).put(ngram.getGram(), ngram);
 		}
 		this.ngramCounts.addAll(ngramCounts);
+		this.smoothing = smoothing;
 	}
 
-	public NGrams(File gramFile) throws ParseException, FileNotFoundException, IOException {
+	public NGrams(File gramFile, boolean smoothing) throws ParseException, FileNotFoundException, IOException {
 		Preconditions.checkNotNull(gramFile);
 		try (FileInputStream fis = new FileInputStream(gramFile);
 				BufferedInputStream bis = new BufferedInputStream(fis);
 				InputStreamReader isr = new InputStreamReader(bis);) {
 			importNGrams(isr);
 		}
+		this.smoothing = smoothing;
 	}
 
-	public NGrams(InputStream is) throws ParseException, IOException {
+	public NGrams(InputStream is, boolean smoothing) throws ParseException, IOException {
 		Preconditions.checkNotNull(is);
 		importNGrams(new InputStreamReader(is));
+		this.smoothing = smoothing;
 	}
 
 	public Set<String> getNgrams(int n) {
@@ -91,13 +102,23 @@ public class NGrams {
 			for (Map.Entry<String, NGram> entry : map.entrySet()) {
 				pw.println(entry.getValue());
 			}
-			// for (NGram gram : data.get(size)) {
-			// pw.println(gram);
-			// }
 		}
 		pw.println("\\end\\");
 		pw.flush();
 	}
+
+//	public double getLogProb(Iterable<String> tags) {
+//		int size = Iterables.size(tags);
+//		Map<String, NGram> ngrams = data.get(size);
+//		if (ngrams == null) {
+//			throw new IllegalStateException("No data for " + size + "-grams");
+//		}
+//		String joinTags = StringUtils.join(tags, ' ');
+//		if (ngrams.containsKey(joinTags)) {
+//			return ngrams.get(joinTags).getLogProb();
+//		}
+//		return Double.NEGATIVE_INFINITY;
+//	}
 
 	public double getLogProb(Iterable<String> tags) {
 		int size = Iterables.size(tags);
@@ -105,15 +126,31 @@ public class NGrams {
 		if (ngrams == null) {
 			throw new IllegalStateException("No data for " + size + "-grams");
 		}
-		String joinTags = StringUtils.join(tags, ' ');
-		if (ngrams.containsKey(joinTags)) {
-			return ngrams.get(joinTags).getLogProb();
+		if (!smoothing) {
+			String joinTags = StringUtils.join(tags, ' ');
+			if (ngrams.containsKey(joinTags)) {
+				return ngrams.get(joinTags).getLogProb();
+			}
+			return Double.NEGATIVE_INFINITY;
+		} else {
+			List<Double> metas = metaparams.get(size);
+			double probs=0;
+			int currGrams=0;
+			StringBuilder joint=new StringBuilder();
+			for (String tag:tags){
+				currGrams++;
+				if (joint.length()==0){
+					joint.append(tag);
+				} else {
+					joint.append(" ").append(tag);
+				}
+				NGram ngram=data.get(currGrams).get(joint.toString());
+				if (ngram!=null){
+					probs +=ngram.getProb()*metas.get(currGrams-1);
+				}
+			}
+			return Math.log10(probs);
 		}
-		return Double.NEGATIVE_INFINITY;
-	}
-
-	public double getProb(List<String> tags) {
-		return Math.pow(10, getLogProb(tags));
 	}
 
 	private void importNGrams(InputStreamReader isr) throws ParseException, IOException {
@@ -127,8 +164,8 @@ public class NGrams {
 		Pattern p = Pattern.compile("\\\\\\d+\\-grams\\\\");
 
 		while (li.hasNext()) {
-			// This state machine is simple enough to implement and not use
-			// ANTLR or something similar
+			// This state machine is simple enough to implement directly and not
+			// use ANTLR or something similar
 			String line = li.nextLine().trim();
 			if (line.equals("\\end\\")) {
 				break;
