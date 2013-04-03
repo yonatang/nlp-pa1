@@ -3,10 +3,11 @@ package idc.nlp.pa1.runner;
 import idc.nlp.pa1.AbstractDecoder;
 import idc.nlp.pa1.CLIUtils;
 import idc.nlp.pa1.baseline.BaselineDecoder;
-import idc.nlp.pa1.baseline.BaselineTags;
-import idc.nlp.pa1.bigram.BigramDecoder;
-import idc.nlp.pa1.bigram.NGrams;
-import idc.nlp.pa1.bigram.PosEmissions;
+import idc.nlp.pa1.baseline.TagsFrequencies;
+import idc.nlp.pa1.ngram.BigramDecoder;
+import idc.nlp.pa1.ngram.NGrams;
+import idc.nlp.pa1.ngram.PosEmissions;
+import idc.nlp.pa1.ngram.TrigramDecoder;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,11 +27,16 @@ public class DecoderRunner {
 		boolean smoothing = true;
 		AbstractDecoder decoder;
 		if (model == 0) {
-			decoder = new BaselineDecoder(input, output, new BaselineTags(param1));
+			decoder = new BaselineDecoder(input, output, new TagsFrequencies(param1));
 		} else if (model == 2) {
 			File param2 = CLIUtils.parseArgFile(args, 3);
 			smoothing = CLIUtils.parseArgBool(args, 4, true);
 			decoder = new BigramDecoder(input, output, new NGrams(param1, smoothing), new PosEmissions(param2,
+					smoothing));
+		} else if (model == 3) {
+			File param2 = CLIUtils.parseArgFile(args, 3);
+			smoothing = CLIUtils.parseArgBool(args, 4, true);
+			decoder = new TrigramDecoder(input, output, new NGrams(param1, smoothing), new PosEmissions(param2,
 					smoothing));
 		} else {
 			throw new IllegalArgumentException("Model " + model + " not supported");

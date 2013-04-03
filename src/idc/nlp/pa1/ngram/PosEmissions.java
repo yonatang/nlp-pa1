@@ -1,4 +1,4 @@
-package idc.nlp.pa1.bigram;
+package idc.nlp.pa1.ngram;
 
 import idc.nlp.pa1.Utils;
 

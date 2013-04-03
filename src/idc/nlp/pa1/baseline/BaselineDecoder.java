@@ -18,15 +18,15 @@ import com.google.common.base.Preconditions;
 public class BaselineDecoder extends AbstractDecoder {
 
 	private static final Logger logger = L.getLogger();
-	private final BaselineTags tags;
+	private final TagsFrequencies tags;
 
-	public BaselineDecoder(File input, File output, BaselineTags tags) throws FileNotFoundException, IOException {
+	public BaselineDecoder(File input, File output, TagsFrequencies tags) throws FileNotFoundException, IOException {
 		super(input, output);
 		Preconditions.checkNotNull(tags);
 		this.tags = tags;
 	}
 
-	public BaselineDecoder(InputStream input, OutputStream output, BaselineTags tags) throws IOException {
+	public BaselineDecoder(InputStream input, OutputStream output, TagsFrequencies tags) throws IOException {
 		super(input, output);
 		Preconditions.checkNotNull(tags);
 		this.tags = tags;

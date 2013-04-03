@@ -46,7 +46,7 @@ public class BaselineTrainerTest {
 	}
 
 	public void testTagLoadMaps() throws IOException {
-		BaselineTags bt = new BaselineTags(freq);
+		TagsFrequencies bt = new TagsFrequencies(freq);
 		Map<String, Map<String, Integer>> expected = ImmutableMap.<String, Map<String, Integer>> of(//
 				"BGDWL", ImmutableMap.of("RB", 3), //
 				"W", ImmutableMap.of("CC", 3),//
@@ -64,7 +64,7 @@ public class BaselineTrainerTest {
 	}
 
 	public void testTagLoadBest() throws IOException {
-		BaselineTags bt = new BaselineTags(freq);
+		TagsFrequencies bt = new TagsFrequencies(freq);
 		Map<String, String> expected = ImmutableMap.<String, String> of(//
 				"BGDWL", "RB", //
 				"W", "CC",//

@@ -1,6 +1,4 @@
-package idc.nlp.pa1.bigram;
-
-import idc.nlp.pa1.AbstractTrainer;
+package idc.nlp.pa1.ngram;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -16,17 +14,19 @@ import org.apache.commons.io.IOUtils;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
-public class BigramTrainer extends AbstractTrainer {
+import idc.nlp.pa1.AbstractTrainer;
 
-	private final boolean smoothing;
-	private final OutputStream lexStream;
-	private final OutputStream gramStream;
-	private final boolean closeStream;
+public abstract class AbstractNGramTrainer extends AbstractTrainer {
 
-	private NGramsCreator ngramsCreator;
-	private PosEmissionsCreator emissionCreator;
+	protected final boolean smoothing;
+	protected final OutputStream lexStream;
+	protected final OutputStream gramStream;
+	protected final boolean closeStream;
+	protected NGramsCreator ngramsCreator;
+	protected PosEmissionsCreator emissionCreator;
 
-	public BigramTrainer(File input, boolean smoothing, File lexFile, File gramFile) throws FileNotFoundException {
+	public AbstractNGramTrainer(File input, boolean smoothing, File lexFile, File gramFile)
+			throws FileNotFoundException {
 		super(input);
 		this.smoothing = smoothing;
 		this.lexStream = new FileOutputStream(lexFile);
@@ -34,19 +34,15 @@ public class BigramTrainer extends AbstractTrainer {
 		this.closeStream = false;
 	}
 
-	public BigramTrainer(InputStream input, boolean smoothing, OutputStream lexStream, OutputStream gramStream) {
+	public AbstractNGramTrainer(InputStream input, boolean smoothing, OutputStream lexStream, OutputStream gramStream) {
 		super(input);
 		this.smoothing = smoothing;
 		this.lexStream = lexStream;
 		this.gramStream = gramStream;
 		this.closeStream = true;
 	}
-
-	@Override
-	public void setup() {
-		ngramsCreator = new NGramsCreator(2, smoothing);
-		emissionCreator = new PosEmissionsCreator(smoothing);
-	}
+	
+	public abstract void setup();
 
 	@Override
 	public void processSentence(ArrayList<SegmentTag> segments) {

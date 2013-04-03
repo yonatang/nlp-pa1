@@ -3,7 +3,8 @@ package idc.nlp.pa1.runner;
 import idc.nlp.pa1.AbstractTrainer;
 import idc.nlp.pa1.CLIUtils;
 import idc.nlp.pa1.baseline.BaselineTrainer;
-import idc.nlp.pa1.bigram.BigramTrainer;
+import idc.nlp.pa1.ngram.BigramTrainer;
+import idc.nlp.pa1.ngram.TrigramTrainer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,16 +18,23 @@ public class TrainerRunner {
 		boolean smoothing = CLIUtils.parseArgBool(args, 2, true);
 		AbstractTrainer trainer;
 		switch (model) {
-		case 0:
+		case 0: {
 			File output = CLIUtils.setExtenstion(file, "dis");
 			trainer = new BaselineTrainer(file, output);
 			break;
-		case 2:
+		}
+		case 2: {
 			File lexFile = CLIUtils.setExtenstion(file, "lex");
 			File gramFile = CLIUtils.setExtenstion(file, "gram");
 			trainer = new BigramTrainer(file, smoothing, lexFile, gramFile);
 			break;
-
+		}
+		case 3: {
+			File lexFile = CLIUtils.setExtenstion(file, "lex");
+			File gramFile = CLIUtils.setExtenstion(file, "gram");
+			trainer = new TrigramTrainer(file, smoothing, lexFile, gramFile);
+			break;
+		}
 		default:
 			throw new IllegalStateException("Cannot find trainer for " + model);
 		}

@@ -1,5 +1,6 @@
 package idc.nlp.pa1.baseline;
 
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,13 +15,13 @@ import static org.testng.Assert.*;
 @Test
 public class BaselineDecoderTest {
 
-	BaselineTags tags;
+	TagsFrequencies tags;
 	InputStream input;
 
 	@BeforeMethod
 	void setup() throws IOException {
 		try (InputStream freq = this.getClass().getResourceAsStream("baseline-test.freq");) {
-			tags = new BaselineTags(freq);
+			tags = new TagsFrequencies(freq);
 		}
 		input = this.getClass().getResourceAsStream("baseline-test.test");
 	}

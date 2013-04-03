@@ -71,6 +71,7 @@ public abstract class AbstractDecoder {
 			out.flush();
 			teardown();
 		} finally {
+
 			if (closeStreams) {
 				IOUtils.closeQuietly(isr);
 				IOUtils.closeQuietly(out);

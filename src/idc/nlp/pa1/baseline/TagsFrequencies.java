@@ -1,5 +1,6 @@
 package idc.nlp.pa1.baseline;
 
+
 import idc.nlp.pa1.ds.TopValueMap;
 
 import java.io.File;
@@ -20,18 +21,18 @@ import java.util.Set;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.StringUtils;
 
-public class BaselineTags {
+public class TagsFrequencies {
 
-	public BaselineTags() {
+	public TagsFrequencies() {
 	}
 
-	public BaselineTags(File input) throws FileNotFoundException, IOException {
+	public TagsFrequencies(File input) throws FileNotFoundException, IOException {
 		try (FileInputStream fis = new FileInputStream(input)) {
 			load(fis);
 		}
 	}
 
-	public BaselineTags(InputStream input) throws IOException {
+	public TagsFrequencies(InputStream input) throws IOException {
 		load(input);
 	}
 

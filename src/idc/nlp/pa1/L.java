@@ -17,7 +17,7 @@ public class L {
 	}
 
 	static {
-		LogManager.getRootLogger().setLevel(Level.WARN);
+		LogManager.getRootLogger().setLevel(Level.INFO);
 		ConsoleAppender ca = new ConsoleAppender();
 		LogManager.getRootLogger().addAppender(ca);
 		ca.setWriter(new OutputStreamWriter(System.out));

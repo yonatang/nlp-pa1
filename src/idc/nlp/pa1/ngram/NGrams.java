@@ -1,4 +1,4 @@
-package idc.nlp.pa1.bigram;
+package idc.nlp.pa1.ngram;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.MessageFormat;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -120,6 +121,9 @@ public class NGrams {
 //		return Double.NEGATIVE_INFINITY;
 //	}
 
+	public double getLogProb(String tags){
+		return getLogProb(Arrays.asList(StringUtils.split(tags)));
+	}
 	public double getLogProb(Iterable<String> tags) {
 		int size = Iterables.size(tags);
 		Map<String, NGram> ngrams = data.get(size);

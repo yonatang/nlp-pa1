@@ -8,25 +8,27 @@ public class TopValueMap<K, V extends Comparable<V>> extends HashMap<K, V> {
 
 	private static final long serialVersionUID = -5610992942649082983L;
 	
-	private K topKey = null;
-	private V topValue = null;
+	private MaxValueFinder<K, V> mvf=new MaxValueFinder<>();
 
 	@Override
 	public V put(K key, V value) {
 		Preconditions.checkNotNull(value);
-		if (topKey == null || topValue.compareTo(value) < 0) {
-			topKey = key;
-			topValue = value;
-		}
+		mvf.check(key, value);
 		return super.put(key, value);
 	}
 	
 	public K getTopKey() {
-		return topKey;
+		return mvf.getTopKey();
 	}
 
 	public V getTopValue() {
-		return topValue;
+		return mvf.getTopValue();
+	}
+	
+	@Override
+	public void clear() {
+		mvf.clear();
+		super.clear();
 	}
 	
 	@Override

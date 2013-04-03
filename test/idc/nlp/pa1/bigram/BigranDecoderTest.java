@@ -1,6 +1,9 @@
 package idc.nlp.pa1.bigram;
 
 import idc.nlp.pa1.Utils;
+import idc.nlp.pa1.ngram.BigramDecoder;
+import idc.nlp.pa1.ngram.NGrams;
+import idc.nlp.pa1.ngram.PosEmissions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;

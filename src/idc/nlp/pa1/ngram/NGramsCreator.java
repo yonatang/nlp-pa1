@@ -1,4 +1,4 @@
-package idc.nlp.pa1.bigram;
+package idc.nlp.pa1.ngram;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import com.google.common.collect.Multiset.Entry;
 import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
 
-import static idc.nlp.pa1.bigram.NGrams.*;
+import static idc.nlp.pa1.ngram.NGrams.*;
 
 public class NGramsCreator {
 

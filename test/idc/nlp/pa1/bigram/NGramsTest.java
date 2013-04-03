@@ -1,5 +1,8 @@
 package idc.nlp.pa1.bigram;
 
+import idc.nlp.pa1.ngram.NGrams;
+import idc.nlp.pa1.ngram.NGramsCreator;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;

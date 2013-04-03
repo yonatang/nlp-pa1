@@ -18,7 +18,7 @@ public class BaselineTrainer extends AbstractTrainer {
 	private final static Logger logger = L.getLogger();
 	private OutputStream output;
 
-	private BaselineTags tags;
+	private TagsFrequencies tags;
 
 	public BaselineTrainer(File input, File output) throws FileNotFoundException {
 		super(input);
@@ -32,7 +32,7 @@ public class BaselineTrainer extends AbstractTrainer {
 
 	@Override
 	public void setup() {
-		tags = new BaselineTags();
+		tags = new TagsFrequencies();
 	}
 
 	@Override

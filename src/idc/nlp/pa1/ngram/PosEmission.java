@@ -1,4 +1,4 @@
-package idc.nlp.pa1.bigram;
+package idc.nlp.pa1.ngram;
 
 import java.util.Collections;
 import java.util.Map;
