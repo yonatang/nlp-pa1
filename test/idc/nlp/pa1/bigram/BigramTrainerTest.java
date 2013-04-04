@@ -102,10 +102,10 @@ public class BigramTrainerTest {
 		}
 
 		for (Entry<String, Double> test : gram1.entrySet()) {
-			assertEquals((Double) grams.getLogProb(Arrays.asList(test.getKey())), test.getValue());
+			assertEquals((Double) grams.getLogProb(new String[]{test.getKey()}), test.getValue());
 		}
 		for (Entry<String, Double> test : gram2.entrySet()) {
-			assertEquals((Double) grams.getLogProb(Arrays.asList(StringUtils.split(test.getKey()))), test.getValue());
+			assertEquals((Double) grams.getLogProb(StringUtils.split(test.getKey())), test.getValue());
 		}
 
 	}

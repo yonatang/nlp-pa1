@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,11 +43,11 @@ public class BigramDecoder extends AbstractNGramDecoder {
 		else
 			segLogProb = 0;
 		for (Entry<String, Double> e : prevV.entrySet()) {
-			double logProb = e.getValue() + getNGramsMap().getLogProb(Arrays.asList(e.getKey(), pos)) + segLogProb;
+			double logProb = e.getValue() + getNGramsMap().getLogProb(new String[]{e.getKey(), pos}) + segLogProb;
 			Level l = logProb > Double.NEGATIVE_INFINITY ? Level.DEBUG : Level.TRACE;
 			logger.log(l,
 					"Prob for P[" + pos + "|" + e.getKey() + "] x P[" + seg + "|" + pos + "] x prevV(" + e.getKey()
-							+ ") = " + getNGramsMap().getLogProb(Arrays.asList(e.getKey(), pos)) + " + " + segLogProb
+							+ ") = " + getNGramsMap().getLogProb(new String[]{e.getKey(), pos}) + " + " + segLogProb
 							+ " + " + e.getValue() + " = " + logProb);
 
 			mpf.check(e.getKey(), logProb);
@@ -55,10 +56,11 @@ public class BigramDecoder extends AbstractNGramDecoder {
 	}
 
 	@Override
-	protected void processSentence(ArrayList<String> segments, PrintWriter out) {
-		logger.info("Analyizing sentence " + segments);
+	protected List<String> processSentence(ArrayList<String> segments) {
+//		logger.info("Analyizing sentence " + segments);
+		List<String> result=new ArrayList<>();
 		if (segments.isEmpty())
-			return;
+			return Collections.emptyList();
 
 		Set<String> posSet = getNGramsMap().getNgrams(1);
 
@@ -75,7 +77,7 @@ public class BigramDecoder extends AbstractNGramDecoder {
 		{
 			boolean allAreZero = true;
 			for (String pos : posSet) {
-				double transLogProb = getNGramsMap().getLogProb(Arrays.asList(NGrams.START, pos));
+				double transLogProb = getNGramsMap().getLogProb(new String[]{NGrams.START, pos});
 				double segLogProb = getEmissions().getLogProb(firstSeg, pos);
 				double logProb = transLogProb + segLogProb;
 				if (logProb > Double.NEGATIVE_INFINITY) {
@@ -146,7 +148,8 @@ public class BigramDecoder extends AbstractNGramDecoder {
 		}
 		if (allAreZero) {
 			for (int i = 0; i < segments.size(); i++) {
-				out.println(segments.get(i) + "\t??");
+				result.add(segments.get(i) + "\t??");
+//				out.println(segments.get(i) + "\t??");
 			}
 		} else {
 
@@ -165,9 +168,11 @@ public class BigramDecoder extends AbstractNGramDecoder {
 				lastPos = b.get(i).get(lastPos);
 			}
 			for (int i = 0; i < segments.size(); i++) {
-				out.println(segments.get(i) + "\t" + poses.get(segments.size() - i - 1));
+				result.add(segments.get(i) + "\t" + poses.get(segments.size() - i - 1));
+//				out.println(segments.get(i) + "\t" + poses.get(segments.size() - i - 1));
 			}
 		}
+		return result;
 	}
 
 }

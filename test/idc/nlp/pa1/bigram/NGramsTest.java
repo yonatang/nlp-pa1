@@ -10,10 +10,9 @@ import java.util.Arrays;
 
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.io.output.WriterOutputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import com.google.common.base.Splitter;
 
 @Test
 public class NGramsTest {
@@ -23,7 +22,7 @@ public class NGramsTest {
 		ngc.addSentence(Arrays.asList("a", "b", "c", "d"));
 		ngc.addSentence(Arrays.asList("a", "b", "e", "a"));
 		NGrams ng=ngc.create();
-		System.out.println(ng.getLogProb("b c _END_"));
+		System.out.println(ng.getLogProb(new String[]{"b","c","_END_"}));
 	}
 	public void testCreateAndReadNs() throws IOException, ParseException {
 		NGramsCreator ngc = new NGramsCreator(3, false);
@@ -38,7 +37,8 @@ public class NGramsTest {
 			NGrams expectedNg = new NGrams(is, false);
 			for (Integer i : expectedNg.getNGramSizes()) {
 				for (String ngram : expectedNg.getNgrams(i)) {
-					Iterable<String> iter = Splitter.on(' ').split(ngram);
+					String[] iter=StringUtils.split(ngram);
+//					Iterable<String> iter = Splitter.on(' ').split(ngram);
 					double expectedLog = expectedNg.getLogProb(iter);
 					double actualLogProb = ng.getLogProb(iter);
 					Assert.assertEquals(actualLogProb, expectedLog, 0.000000000000001);
@@ -47,7 +47,8 @@ public class NGramsTest {
 
 			for (Integer i : ng.getNGramSizes()) {
 				for (String ngram : ng.getNgrams(i)) {
-					Iterable<String> iter = Splitter.on(' ').split(ngram);
+					String[] iter=StringUtils.split(ngram);
+//					Iterable<String> iter = Splitter.on(' ').split(ngram);
 					double expectedLog = expectedNg.getLogProb(iter);
 					double actualLogProb = ng.getLogProb(iter);
 					Assert.assertEquals(actualLogProb, expectedLog, 0.000000000000001);
@@ -60,7 +61,7 @@ public class NGramsTest {
 		NGramsCreator ngc = new NGramsCreator(2, false);
 		ngc.addSentence(Arrays.asList("yyQUOT", "VB", "NN", "CC", "RB", "yyDOT"));
 		NGrams ng = ngc.create();
-		System.out.println(ng.getLogProb(Arrays.asList("RB", "yyDOT")));
+		System.out.println(ng.getLogProb(new String[]{"RB", "yyDOT"}));
 
 	}
 }

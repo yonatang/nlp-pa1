@@ -1,7 +1,13 @@
 package idc.nlp.pa1;
 
+import idc.nlp.pa1.ngram.NGrams;
+
 import java.text.MessageFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -12,7 +18,7 @@ import com.google.common.collect.TreeMultiset;
 
 public class Test {
 	private static final Logger logger=L.getLogger();
-	public static void main(String... args) throws ParseException {
+	public static void main(String... args) throws Exception{
 		logger.info("TEST");
 //		TreeMap<String, Integer> map=new ValueSortedMap<>(Ordering.natural());
 //		
@@ -20,7 +26,23 @@ public class Test {
 //		map.put("bbbbb", 50);
 //System.out.println(map.containsKey("aaaaa"));		
 //		System.out.println(map.firstKey());
-		
+		List<String> a=new ArrayList<>();
+		List<String> b=new ArrayList<>();
+		a.add("bb");
+		b.add("bb");
+		System.out.println(a.equals(b));
+		class C implements Callable<Double>  {
+
+			double val;
+			public C(double val){
+				this.val=val;
+			}
+			@Override
+			public Double call() throws Exception {
+				System.out.println("CALC");
+				return Math.log10(val);
+			}
+		};
 		Multiset<Integer> ms=HashMultiset.create();
 		Multiset<Integer> ms2=TreeMultiset.create();
 		

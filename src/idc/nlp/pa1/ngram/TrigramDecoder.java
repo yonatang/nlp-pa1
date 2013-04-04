@@ -8,28 +8,21 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
+import com.google.common.base.Objects;
 
 public class TrigramDecoder extends AbstractNGramDecoder {
-	private static final Logger logger = L.getLogger();
 
 	public TrigramDecoder(File input, File output, NGrams ngrams, PosEmissions emissions) throws FileNotFoundException,
 			IOException, ParseException {
@@ -41,25 +34,11 @@ public class TrigramDecoder extends AbstractNGramDecoder {
 		super(input, output, ngrams, emissions);
 	}
 
-	private MaxValueFinder<String, Double> argmax(Set<String> posSet, Map<String, Double> prevV, String u, String v,
-			String seg) {
-		MaxValueFinder<String, Double> mvf = new MaxValueFinder<>();
-		double emisProb = getEmissions().getLogProb(seg, v);
-		for (String w : posSet) {
-			Double prevProb = prevV.get(w + " " + u);
-			if (prevProb == null)
-				prevProb = Double.NEGATIVE_INFINITY;
-			double gramProb = getNGramsMap().getLogProb(w + " " + u + " " + v);
-			mvf.check(w, prevProb + gramProb + emisProb);
-		}
-		return mvf;
-	}
-
 	@Override
-	protected void processSentence(ArrayList<String> segments, PrintWriter out) {
-		logger.info("Analyizing sentence " + segments);
+	protected List<String> processSentence(ArrayList<String> segments) {
+		List<String> result = new ArrayList<>();
 		if (segments.isEmpty())
-			return;
+			return Collections.emptyList();
 
 		Set<String> posSet = new HashSet<>(getNGramsMap().getNgrams(1));
 		posSet.add(NGrams.START);
@@ -79,34 +58,25 @@ public class TrigramDecoder extends AbstractNGramDecoder {
 		}
 		v0.put(NGrams.START + " " + NGrams.START, 0d);
 
-		System.out.println();
 		for (int i = 0; i < segments.size(); i++) {
-			System.out.println("SEG " + segments.get(i));
 			Map<String, Double> currentV = new HashMap<>();
 			Map<String, String> currentB = new HashMap<>();
 			v.put(i + 1, currentV);
 			b.put(i + 1, currentB);
 			Map<String, Double> prevV = v.get(i);
-			// SEG A
-			// _START_ A - _START_ - -0.2218487496163564
-			// SEG B
-			// A B - _START_ - -0.26760624017703155
+
 			for (String ct : posSet) {
+				double emissionProb = getEmissions().getLogProb(segments.get(i), ct);
 				for (String bt : posSet) {
 					for (String at : posSet) {
-						String atBt=at+" "+bt;
-						double prob = prevV.containsKey(at + " " + bt) ? prevV.get(at + " " + bt)
-								: Double.NEGATIVE_INFINITY;
-						double probb = getNGramsMap().getLogProb(at + " " + bt + " " + ct)
-								+ getEmissions().getLogProb(segments.get(i), ct) + prob;
-//						if (!Double.isInfinite(probb)) {
-//							System.out.println(bt + " " + ct + " - " + at + " - " + probb);
-//						}
-						if (!currentV.containsKey(bt + " " + ct)
-								|| (currentV.containsKey(bt + " " + ct) && currentV.get(bt + " " + ct) < probb)) {
-							currentV.put(bt + " " + ct, probb);
-							if (!Double.isInfinite(probb)) {
-								currentB.put(bt + " " + ct, at);
+						String atBt = at + " " + bt;
+						String btCt = bt + " " + ct;
+						double prevProb = Objects.firstNonNull(prevV.get(atBt), Double.NEGATIVE_INFINITY);
+						double prob = getNGramsMap().getLogProb(new String[] { at, bt, ct }) + emissionProb + prevProb;
+						if (!currentV.containsKey(btCt) || currentV.get(btCt) < prob) {
+							currentV.put(btCt, prob);
+							if (!Double.isInfinite(prob)) {
+								currentB.put(btCt, at);
 							}
 						}
 					}
@@ -115,201 +85,29 @@ public class TrigramDecoder extends AbstractNGramDecoder {
 		}
 		Map<String, Double> lastV = v.get(segments.size());
 
-		System.out.println();
-		for (int i=0;i<b.size();i++){
-			System.out.println(i+"  -  "+b.get(i));
-		}
-//		System.out.println(lastV);
-//		System.out.println();
-//		System.out.println();
-		String bestB = null;
-		double bestV = Double.NEGATIVE_INFINITY;
+		MaxValueFinder<String, Double> mvf = new MaxValueFinder<>();
 		for (String pos0 : posSet) {
 			for (String pos1 : posSet) {
-				double prob = lastV.containsKey(pos0 + " " + pos1) ? lastV.get(pos0 + " " + pos1)
-						: Double.NEGATIVE_INFINITY;
-				// System.out.println(pos0+" "+pos1+" _END_ -  "+getNGramsMap().getLogProb(pos0+" "+pos1+" _END_"));
-				double probb = getNGramsMap().getLogProb(pos0 + " " + pos1 + " _END_") + prob;
-				if (!Double.isInfinite(probb)) {
-//					System.out.println(pos1 + " " + "_END_" + " - " + pos0 + " - " + probb);
-					if (bestV < probb) {
-						bestV = probb;
-						bestB = pos0 + " " + pos1;
-					}
-				}
+				String joint = pos0 + " " + pos1;
+				double lastProb = Objects.firstNonNull(lastV.get(joint), Double.NEGATIVE_INFINITY);
+				double prob = getNGramsMap().getLogProb(new String[] { pos0, pos1, NGrams.END }) + lastProb;
+				mvf.check(joint, prob);
 			}
 		}
-		System.out.println("BEST B "+bestB);
-		ArrayList<String> res = new ArrayList<>();
-		res.add(StringUtils.substringAfter(bestB, " "));
-		res.add(StringUtils.substringBefore(bestB, " "));
+
+		LinkedList<String> res = new LinkedList<>();
+		res.add(StringUtils.substringAfter(mvf.getTopKey(), " "));
+		res.add(StringUtils.substringBefore(mvf.getTopKey(), " "));
 		for (int i = 0; i < segments.size() - 2; i++) {
-			res.add(b.get(segments.size() - i).get(res.get(i+1) + " " + res.get(i )));
+			res.add(b.get(segments.size() - i).get(res.get(i + 1) + " " + res.get(i)));
 		}
 		java.util.Collections.reverse(res);
-		
-		for (int i=0;i<segments.size();i++){
-			out.println(segments.get(i)+"\t"+res.get(i));
-		}
-//		System.out.println(res);
-//		System.out.println(b.get(segments.size()).get(bestB));
 
-		if (true)
-			return;
-
-		boolean allAreZero = false;
 		for (int i = 0; i < segments.size(); i++) {
-
-			Map<String, Double> currentV = new HashMap<>();
-			Map<String, String> currentB = new HashMap<>();
-			v.put(i + 1, currentV);
-			b.put(i + 1, currentB);
-			allAreZero = true;
-			for (String pos0 : posSet) {
-				for (String pos1 : posSet) {
-					MaxValueFinder<String, Double> mvf = argmax(posSet, v.get(i), pos0, pos1, segments.get(i));
-					currentV.put(pos0 + " " + pos1, mvf.getTopValue());
-
-					if (!Double.isInfinite(mvf.getTopValue())) {
-						currentB.put(pos0 + " " + pos1, mvf.getTopKey());
-						allAreZero = false;
-					}
-				}
-			}
-			if (allAreZero) {
-				break;
-			}
+			result.add(segments.get(i) + "\t" + res.get(i));
 		}
 
-		if (allAreZero) {
-			for (int i = 0; i < segments.size(); i++) {
-				out.println(segments.get(i) + "\t??");
-			}
-			return;
-		}
-
-		MaxValueFinder<String, Double> mvf = new MaxValueFinder<>();
-		for (String uPos : posSet) {
-			for (String vPos : posSet) {
-				String joint = uPos + " " + vPos;
-				mvf.check(joint, getNGramsMap().getLogProb(joint + " " + NGrams.END));
-			}
-		}
-		List<String> y = new ArrayList<>();
-		y.add(StringUtils.substringAfter(mvf.getTopKey(), " "));
-		y.add(StringUtils.substringBefore(mvf.getTopKey(), " "));
-		for (int i = 2; i < segments.size(); i++) {
-			String two = y.get(i - 1) + " " + y.get(i - 2);
-			// System.out.println(" "+two);
-			String val = b.get(segments.size() - i + 2).get(two);
-			// System.out.println(" "+val);
-			y.add(val);
-		}
-		Lists.reverse(y);
-		for (int i = 0; i < y.size(); i++) {
-			out.println(segments.get(i) + "\t" + y.get(i));
-		}
-		// for ()
-		//
-		// String firstSeg = segments.get(0);
-		// logger.info("### Analyizing " + firstSeg);
-		// {
-		// boolean allAreZero = true;
-		// for (String pos : posSet) {
-		// double transLogProb =
-		// getNGramsMap().getLogProb(Arrays.asList(NGrams.START, NGrams.START,
-		// pos));
-		// double segLogProb = getEmissions().getLogProb(firstSeg, pos);
-		// double logProb = transLogProb + segLogProb;
-		// if (logProb > Double.NEGATIVE_INFINITY) {
-		// logger.debug("Prob for P[" + pos + "|_START] x P[" + firstSeg + "|" +
-		// pos + "] = " + segLogProb
-		// + " + " + transLogProb + " = " + logProb);
-		// } else {
-		// logger.trace("Prob for P[" + pos + "|_START] x P[" + firstSeg + "|" +
-		// pos + "] = " + segLogProb
-		// + " + " + transLogProb + " = " + logProb);
-		// }
-		// if (!Double.isInfinite(logProb))
-		// allAreZero = false;
-		// v0.put(pos, logProb);
-		// b0.put(pos, NGrams.START+" "+NGrams.START);
-		// }
-		// if (allAreZero) {
-		// // If we cannot make a useful estimate about the next to
-		// logger.info("Didn't find any option for " + firstSeg +
-		// ". Tagging it as NN");
-		// v0.put(NGrams.START + " " + "NN", 0d); // P["NN"|"_START_"]=log(0)=1
-		// }
-		// }
-		//
-		// for (int i = 1; i < segments.size(); i++) {
-		// Map<String, Double> currentV = new HashMap<>();
-		// Map<String, String> currentB = new HashMap<>();
-		// v.put(i, currentV);
-		// b.put(i, currentB);
-		//
-		// String seg = segments.get(i);
-		// logger.info("### Analyizing " + seg);
-		//
-		// boolean allAreZero = true;
-		// for (String pos : posSet) {
-		// for (String pos2 : posSet) {
-		// MaxValueFinder<String, Double> mpf = argmax(v.get(i - 2), pos, pos2,
-		// seg);
-		// if (!Double.isInfinite(mpf.getTopValue()))
-		// allAreZero = false;
-		// currentV.put(pos, mpf.getTopValue());
-		// currentB.put(pos, mpf.getTopKey());
-		// }
-		//
-		// }
-		// if (allAreZero) {
-		// // If we cannot make a useful estimate about the next to
-		// logger.info("Didn't find any option for " + seg +
-		// ". Tagging it as NN");
-		// MaxValueFinder<String, Double> mpfNoNGram = new MaxValueFinder<>();
-		// MaxValueFinder<String, Double> mpfWithNGram = new MaxValueFinder<>();
-		// for (Entry<String, Double> e : v.get(i - 1).entrySet()) {
-		// // search for the highest probability previous state
-		// mpfNoNGram.check(e.getKey(), e.getValue());
-		// // search for the best bigram for NN (might not find one, if
-		// // there is smoothing is off)
-		// mpfWithNGram.check(e.getKey(),
-		// getNGramsMap().getLogProb(Arrays.asList(e.getKey(), "NN")));
-		// }
-		// currentV.put("NN", 0d);
-		// if (Double.isInfinite(mpfWithNGram.getTopValue())) {
-		// // in rare cases this might improve results, when P[S'] >>
-		// // P[S|S']
-		// currentB.put("NN", mpfWithNGram.getTopKey());
-		// } else {
-		// currentB.put("NN", mpfNoNGram.getTopKey());
-		// }
-		// }
-		// }
-		//
-		// Map<String, Double> lastV = new HashMap<>();
-		// Map<String, String> lastB = new HashMap<>();
-		// MaxValueFinder<String, Double> mpf = argmax(v.get(segments.size() -
-		// 1), NGrams.END, "");
-		// lastV.put(NGrams.END, mpf.getTopValue());
-		// lastB.put(NGrams.END, mpf.getTopKey());
-		// v.put(segments.size(), lastV);
-		// b.put(segments.size(), lastB);
-		//
-		// String lastPos = NGrams.END;
-		// List<String> poses = new ArrayList<>();
-		// for (int i = segments.size(); i > 0; i--) {
-		// poses.add(b.get(i).get(lastPos));
-		// lastPos = b.get(i).get(lastPos);
-		// }
-		// for (int i = 0; i < segments.size(); i++) {
-		// out.println(segments.get(i) + "\t" + poses.get(segments.size() - i -
-		// 1));
-		// }
-		// out.flush();
-
+		return result;
 	}
 
 }

@@ -8,8 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -33,13 +33,13 @@ public class BaselineDecoder extends AbstractDecoder {
 	}
 
 	@Override
-	protected void processSentence(ArrayList<String> segments, PrintWriter out) {
-		logger.debug("processing sentence " + segments);
+	protected List<String> processSentence(ArrayList<String> segments) {
+		List<String> result=new ArrayList<>();
 		for (String seg : segments) {
 			String tag = tags.getBestTag(seg);
-			out.println(seg + "\t" + tag);
+			result.add(seg + "\t" + tag);
 		}
-		out.flush();
+		return result;
 	}
 
 }

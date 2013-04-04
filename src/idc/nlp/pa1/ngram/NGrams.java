@@ -11,7 +11,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,16 +22,18 @@ import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 
 public class NGrams {
 	public static final String START = "_START_";
 	public static final String END = "_END_";
+	public static final Cache<String, Double> ngramCache = CacheBuilder.newBuilder().build();
 
 	private static final Map<Integer, List<Double>> metaparams = ImmutableMap.<Integer, List<Double>> builder()
 			.put(1, ImmutableList.of(1d)) //
@@ -108,41 +109,34 @@ public class NGrams {
 		pw.flush();
 	}
 
-	// public double getLogProb(Iterable<String> tags) {
-	// int size = Iterables.size(tags);
-	// Map<String, NGram> ngrams = data.get(size);
-	// if (ngrams == null) {
-	// throw new IllegalStateException("No data for " + size + "-grams");
-	// }
-	// String joinTags = StringUtils.join(tags, ' ');
-	// if (ngrams.containsKey(joinTags)) {
-	// return ngrams.get(joinTags).getLogProb();
-	// }
-	// return Double.NEGATIVE_INFINITY;
-	// }
-
-	public double getLogProb(String tags) {
-		return getLogProb(Arrays.asList(StringUtils.split(tags)));
+	public double getLogProb(String tags){
+		Double ret=ngramCache.getIfPresent(tags);
+		if (ret!=null) return ret;
+		return getLogProb(StringUtils.split(tags));
 	}
+	public double getLogProb(String[] tags) {
+		String joinTags = StringUtils.join(tags, ' ');
 
-	public double getLogProb(Iterable<String> tags) {
-		int size = Iterables.size(tags);
+		int size = tags.length;
+
 		Map<String, NGram> ngrams = data.get(size);
 		if (ngrams == null) {
 			throw new IllegalStateException("No data for " + size + "-grams");
 		}
 		if (!smoothing) {
-			String joinTags = StringUtils.join(tags, ' ');
+
 			if (ngrams.containsKey(joinTags)) {
 				return ngrams.get(joinTags).getLogProb();
 			}
 			return Double.NEGATIVE_INFINITY;
 		} else {
+			Double ret= ngramCache.getIfPresent(joinTags);
+			if (ret != null)
+				return ret;
 			List<Double> metas = metaparams.get(size);
 			double probs = 0;
 			int currGrams = 0;
 			StringBuilder joint = new StringBuilder();
-//			System.out.println("CALCING FOR "+StringUtils.join(tags, ' '));
 			for (String tag : tags) {
 				currGrams++;
 				if (joint.length() == 0) {
@@ -150,13 +144,14 @@ public class NGrams {
 				} else {
 					joint.append(" ").append(tag);
 				}
-//				System.out.println("     "+joint);
 				NGram ngram = data.get(currGrams).get(joint.toString());
 				if (ngram != null) {
 					probs += ngram.getProb() * metas.get(currGrams - 1);
 				}
 			}
-			return Math.log10(probs);
+			ret = Math.log10(probs);
+			ngramCache.put(joinTags, ret);
+			return ret;
 		}
 	}
 
