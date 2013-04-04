@@ -108,22 +108,23 @@ public class NGrams {
 		pw.flush();
 	}
 
-//	public double getLogProb(Iterable<String> tags) {
-//		int size = Iterables.size(tags);
-//		Map<String, NGram> ngrams = data.get(size);
-//		if (ngrams == null) {
-//			throw new IllegalStateException("No data for " + size + "-grams");
-//		}
-//		String joinTags = StringUtils.join(tags, ' ');
-//		if (ngrams.containsKey(joinTags)) {
-//			return ngrams.get(joinTags).getLogProb();
-//		}
-//		return Double.NEGATIVE_INFINITY;
-//	}
+	// public double getLogProb(Iterable<String> tags) {
+	// int size = Iterables.size(tags);
+	// Map<String, NGram> ngrams = data.get(size);
+	// if (ngrams == null) {
+	// throw new IllegalStateException("No data for " + size + "-grams");
+	// }
+	// String joinTags = StringUtils.join(tags, ' ');
+	// if (ngrams.containsKey(joinTags)) {
+	// return ngrams.get(joinTags).getLogProb();
+	// }
+	// return Double.NEGATIVE_INFINITY;
+	// }
 
-	public double getLogProb(String tags){
+	public double getLogProb(String tags) {
 		return getLogProb(Arrays.asList(StringUtils.split(tags)));
 	}
+
 	public double getLogProb(Iterable<String> tags) {
 		int size = Iterables.size(tags);
 		Map<String, NGram> ngrams = data.get(size);
@@ -138,19 +139,21 @@ public class NGrams {
 			return Double.NEGATIVE_INFINITY;
 		} else {
 			List<Double> metas = metaparams.get(size);
-			double probs=0;
-			int currGrams=0;
-			StringBuilder joint=new StringBuilder();
-			for (String tag:tags){
+			double probs = 0;
+			int currGrams = 0;
+			StringBuilder joint = new StringBuilder();
+//			System.out.println("CALCING FOR "+StringUtils.join(tags, ' '));
+			for (String tag : tags) {
 				currGrams++;
-				if (joint.length()==0){
+				if (joint.length() == 0) {
 					joint.append(tag);
 				} else {
 					joint.append(" ").append(tag);
 				}
-				NGram ngram=data.get(currGrams).get(joint.toString());
-				if (ngram!=null){
-					probs +=ngram.getProb()*metas.get(currGrams-1);
+//				System.out.println("     "+joint);
+				NGram ngram = data.get(currGrams).get(joint.toString());
+				if (ngram != null) {
+					probs += ngram.getProb() * metas.get(currGrams - 1);
 				}
 			}
 			return Math.log10(probs);

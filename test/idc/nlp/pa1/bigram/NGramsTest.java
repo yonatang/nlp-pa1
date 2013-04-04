@@ -18,6 +18,13 @@ import com.google.common.base.Splitter;
 @Test
 public class NGramsTest {
 
+	public void testS() throws Exception {
+		NGramsCreator ngc = new NGramsCreator(3, true);
+		ngc.addSentence(Arrays.asList("a", "b", "c", "d"));
+		ngc.addSentence(Arrays.asList("a", "b", "e", "a"));
+		NGrams ng=ngc.create();
+		System.out.println(ng.getLogProb("b c _END_"));
+	}
 	public void testCreateAndReadNs() throws IOException, ParseException {
 		NGramsCreator ngc = new NGramsCreator(3, false);
 		ngc.addSentence(Arrays.asList("a", "b", "c", "d"));
