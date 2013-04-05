@@ -8,10 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +55,6 @@ public class BigramDecoder extends AbstractNGramDecoder {
 
 	@Override
 	protected List<String> processSentence(ArrayList<String> segments) {
-//		logger.info("Analyizing sentence " + segments);
 		List<String> result=new ArrayList<>();
 		if (segments.isEmpty())
 			return Collections.emptyList();
@@ -73,7 +70,7 @@ public class BigramDecoder extends AbstractNGramDecoder {
 		b.put(0, b0);
 
 		String firstSeg = segments.get(0);
-		logger.info("### Analyizing " + firstSeg);
+		logger.debug("### Analyizing " + firstSeg);
 		{
 			boolean allAreZero = true;
 			for (String pos : posSet) {
@@ -107,7 +104,7 @@ public class BigramDecoder extends AbstractNGramDecoder {
 			b.put(i, currentB);
 
 			String seg = segments.get(i);
-			logger.info("### Analyizing " + seg);
+			logger.debug("### Analyizing " + seg);
 
 			allAreZero = true;
 			for (String pos : posSet) {
@@ -149,7 +146,6 @@ public class BigramDecoder extends AbstractNGramDecoder {
 		if (allAreZero) {
 			for (int i = 0; i < segments.size(); i++) {
 				result.add(segments.get(i) + "\t??");
-//				out.println(segments.get(i) + "\t??");
 			}
 		} else {
 
@@ -169,7 +165,6 @@ public class BigramDecoder extends AbstractNGramDecoder {
 			}
 			for (int i = 0; i < segments.size(); i++) {
 				result.add(segments.get(i) + "\t" + poses.get(segments.size() - i - 1));
-//				out.println(segments.get(i) + "\t" + poses.get(segments.size() - i - 1));
 			}
 		}
 		return result;

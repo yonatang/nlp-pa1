@@ -68,7 +68,8 @@ public abstract class AbstractDecoder {
 		@Override
 		public List<String> call() {
 
-			logger.info("Processing sentence #" + count + ": " + segs);
+			logger.info("Processing sentence #" + count);
+			logger.debug(segs);
 			List<String> result = processSentence(segs);
 			logger.info("Processing sentence #" + count + " done");
 			return result;

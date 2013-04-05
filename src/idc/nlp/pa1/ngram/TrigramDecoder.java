@@ -1,6 +1,5 @@
 package idc.nlp.pa1.ngram;
 
-import idc.nlp.pa1.L;
 import idc.nlp.pa1.ds.MaxValueFinder;
 
 import java.io.File;

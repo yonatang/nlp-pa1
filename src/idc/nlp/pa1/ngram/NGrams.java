@@ -38,7 +38,7 @@ public class NGrams {
 	private static final Map<Integer, List<Double>> metaparams = ImmutableMap.<Integer, List<Double>> builder()
 			.put(1, ImmutableList.of(1d)) //
 			.put(2, ImmutableList.of(0.01d, 0.99d))//
-			.put(3, ImmutableList.of(0.1d, 0.3d, 0.6d))//
+			.put(3, ImmutableList.of(0.001d, 0.009d, 0.99d))//
 			.build();
 	private final boolean smoothing;
 	private SortedMap<Integer, SortedMap<String, NGram>> data = new TreeMap<>();
