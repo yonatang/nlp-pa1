@@ -1,6 +1,5 @@
 package idc.nlp.pa1;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +16,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
@@ -29,6 +26,7 @@ import com.google.common.base.Preconditions;
 public abstract class AbstractDecoder {
 
 	private static final Logger logger = L.getLogger();
+	private static final int NUMBER_OF_THREADS = 4;
 	private final InputStream input;
 	private final OutputStream output;
 	private final boolean closeStreams;
@@ -79,7 +77,7 @@ public abstract class AbstractDecoder {
 	}
 
 	public void decode() throws IOException {
-		ExecutorService es = Executors.newFixedThreadPool(4);
+		ExecutorService es = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
 		InputStreamReader isr = new InputStreamReader(input);
 		PrintWriter out = new PrintWriter(output);
 		List<Future<List<String>>> futures = new ArrayList<>();

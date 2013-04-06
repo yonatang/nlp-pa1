@@ -33,12 +33,14 @@ import com.google.common.collect.Multiset;
 public class NGrams {
 	public static final String START = "_START_";
 	public static final String END = "_END_";
-	public static final Cache<String, Double> ngramCache = CacheBuilder.newBuilder().build();
+	public static final Cache<String, Double> ngramCache = CacheBuilder.newBuilder().softValues().build();
 
 	private static final Map<Integer, List<Double>> metaparams = ImmutableMap.<Integer, List<Double>> builder()
 			.put(1, ImmutableList.of(1d)) //
 			.put(2, ImmutableList.of(0.01d, 0.99d))//
 			.put(3, ImmutableList.of(0.001d, 0.009d, 0.99d))//
+			.put(4, ImmutableList.of(0.001d, 0.009d, 0.04d, 0.95d))//
+			.put(5, ImmutableList.of(0.0001d, 0.0009d, 0.009d, 0.09d, 0.9d))//
 			.build();
 	private final boolean smoothing;
 	private SortedMap<Integer, SortedMap<String, NGram>> data = new TreeMap<>();
@@ -109,11 +111,13 @@ public class NGrams {
 		pw.flush();
 	}
 
-	public double getLogProb(String tags){
-		Double ret=ngramCache.getIfPresent(tags);
-		if (ret!=null) return ret;
+	public double getLogProb(String tags) {
+		Double ret = ngramCache.getIfPresent(tags);
+		if (ret != null)
+			return ret;
 		return getLogProb(StringUtils.split(tags));
 	}
+
 	public double getLogProb(String[] tags) {
 		String joinTags = StringUtils.join(tags, ' ');
 
@@ -130,7 +134,7 @@ public class NGrams {
 			}
 			return Double.NEGATIVE_INFINITY;
 		} else {
-			Double ret= ngramCache.getIfPresent(joinTags);
+			Double ret = ngramCache.getIfPresent(joinTags);
 			if (ret != null)
 				return ret;
 			List<Double> metas = metaparams.get(size);

@@ -26,6 +26,9 @@ public class Test {
 //		map.put("bbbbb", 50);
 //System.out.println(map.containsKey("aaaaa"));		
 //		System.out.println(map.firstKey());
+		System.out.println(StringUtils.repeat(NGrams.START," ", 3));
+		String[] ab={"A","B","C","D"};
+		System.out.println(StringUtils.join(ab, ' ', 1, ab.length)+' '+"!");
 		List<String> a=new ArrayList<>();
 		List<String> b=new ArrayList<>();
 		a.add("bb");

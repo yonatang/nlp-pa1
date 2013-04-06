@@ -4,6 +4,7 @@ import idc.nlp.pa1.AbstractTrainer;
 import idc.nlp.pa1.CLIUtils;
 import idc.nlp.pa1.baseline.BaselineTrainer;
 import idc.nlp.pa1.ngram.BigramTrainer;
+import idc.nlp.pa1.ngram.NGramTrainer;
 import idc.nlp.pa1.ngram.TrigramTrainer;
 
 import java.io.File;
@@ -36,7 +37,13 @@ public class TrainerRunner {
 			break;
 		}
 		default:
-			throw new IllegalStateException("Cannot find trainer for " + model);
+			if (model <= 5) {
+				File lexFile = CLIUtils.setExtenstion(file, "lex");
+				File gramFile = CLIUtils.setExtenstion(file, "gram");
+				trainer = new NGramTrainer(model, file, smoothing, lexFile, gramFile);
+			} else {
+				throw new IllegalStateException("Cannot find trainer for " + model);
+			}
 		}
 		System.out.println(String.format("Training model %d with%s smoothing...", model, (!smoothing ? "out" : "")));
 		long startTime = System.currentTimeMillis();

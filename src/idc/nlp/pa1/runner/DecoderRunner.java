@@ -5,6 +5,7 @@ import idc.nlp.pa1.CLIUtils;
 import idc.nlp.pa1.baseline.BaselineDecoder;
 import idc.nlp.pa1.baseline.TagsFrequencies;
 import idc.nlp.pa1.ngram.BigramDecoder;
+import idc.nlp.pa1.ngram.NGramDecoder;
 import idc.nlp.pa1.ngram.NGrams;
 import idc.nlp.pa1.ngram.PosEmissions;
 import idc.nlp.pa1.ngram.TrigramDecoder;
@@ -37,6 +38,14 @@ public class DecoderRunner {
 			File param2 = CLIUtils.parseArgFile(args, 3);
 			smoothing = CLIUtils.parseArgBool(args, 4, true);
 			decoder = new TrigramDecoder(input, output, new NGrams(param1, smoothing), new PosEmissions(param2,
+					smoothing));
+			// decoder = new NGramDecoder(3, input, output, new NGrams(param1,
+			// smoothing), new PosEmissions(param2,
+			// smoothing));
+		} else if (model <= 5) {
+			File param2 = CLIUtils.parseArgFile(args, 3);
+			smoothing = CLIUtils.parseArgBool(args, 4, true);
+			decoder = new NGramDecoder(model, input, output, new NGrams(param1, smoothing), new PosEmissions(param2,
 					smoothing));
 		} else {
 			throw new IllegalArgumentException("Model " + model + " not supported");

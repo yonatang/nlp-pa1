@@ -66,6 +66,11 @@ public class TrigramDecoder extends AbstractNGramDecoder {
 
 			for (String ct : posSet) {
 				double emissionProb = getEmissions().getLogProb(segments.get(i), ct);
+				
+				// no freezing snow-ball in hell chance that we'll get a non-zero probability to that state
+				if (Double.isInfinite(emissionProb))
+					continue;
+				
 				for (String bt : posSet) {
 					for (String at : posSet) {
 						String atBt = at + " " + bt;

@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 
+import idc.nlp.pa1.AbstractDecoder;
 import idc.nlp.pa1.Utils;
+import idc.nlp.pa1.ngram.NGramDecoder;
 import idc.nlp.pa1.ngram.NGrams;
 import idc.nlp.pa1.ngram.PosEmissions;
 import idc.nlp.pa1.ngram.TrigramDecoder;
@@ -18,30 +20,30 @@ import org.testng.annotations.Test;
 @Test
 public class TrigramDecoderTest {
 
-	
 	public void tt() throws Exception {
-		InputStream is=Utils.getStream(this, "trigram-tmp.train");
-		ByteArrayOutputStream lex=new ByteArrayOutputStream();
-		ByteArrayOutputStream gram=new ByteArrayOutputStream();
-		TrigramTrainer tt=new TrigramTrainer(is, true, lex, gram);
+		InputStream is = Utils.getStream(this, "trigram-tmp.train");
+		ByteArrayOutputStream lex = new ByteArrayOutputStream();
+		ByteArrayOutputStream gram = new ByteArrayOutputStream();
+		TrigramTrainer tt = new TrigramTrainer(is, true, lex, gram);
 		tt.train();
 		is.close();
 		System.out.println(lex);
 		System.out.println(gram);
-		
-		ByteArrayInputStream lexIn=new ByteArrayInputStream(lex.toByteArray());
-		ByteArrayInputStream gramIn=new ByteArrayInputStream(gram.toByteArray());
-		
-		String testSent="A\nB\nE\nB\nC";
-		
-		NGrams ng=new NGrams(gramIn, true);
-		PosEmissions em=new PosEmissions(lexIn, true);
-		ByteArrayInputStream testIn=new ByteArrayInputStream(testSent.getBytes());
-		ByteArrayOutputStream test=new ByteArrayOutputStream();
-		TrigramDecoder td=new TrigramDecoder(testIn, test, ng, em);
+
+		ByteArrayInputStream lexIn = new ByteArrayInputStream(lex.toByteArray());
+		ByteArrayInputStream gramIn = new ByteArrayInputStream(gram.toByteArray());
+
+		String testSent = "A\nB\nE\nB\nC";
+
+		NGrams ng = new NGrams(gramIn, true);
+		PosEmissions em = new PosEmissions(lexIn, true);
+		ByteArrayInputStream testIn = new ByteArrayInputStream(testSent.getBytes());
+		ByteArrayOutputStream test = new ByteArrayOutputStream();
+		TrigramDecoder td = new TrigramDecoder(testIn, test, ng, em);
 		td.decode();
 		System.out.println(test);
 	}
+
 	public void t() throws FileNotFoundException, IOException, ParseException {
 		// InputStream is=Utils.getStream(this, "bigram-test.train");
 		// ByteArrayOutputStream lex=new ByteArrayOutputStream();
@@ -54,10 +56,56 @@ public class TrigramDecoderTest {
 		// System.out.println(gram);
 		InputStream is = Utils.getStream(this, "trigram-s-test.test");
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		TrigramDecoder tg = new TrigramDecoder(is, out,
-				new NGrams(Utils.getStream(this, "trigram-s-test.gram"), true), new PosEmissions(Utils.getStream(this,
-						"trigram-s-test.lex"), true));
+		TrigramDecoder tg = new TrigramDecoder(is, out, new NGrams(Utils.getStream(this, "trigram-s-test.gram"), true),
+				new PosEmissions(Utils.getStream(this, "trigram-s-test.lex"), true));
 		tg.decode();
+		is.close();
+		System.out.println(out);
+
+	}
+	
+	public void ttNgram() throws Exception {
+		InputStream is = Utils.getStream(this, "trigram-tmp.train");
+		ByteArrayOutputStream lex = new ByteArrayOutputStream();
+		ByteArrayOutputStream gram = new ByteArrayOutputStream();
+		TrigramTrainer tt = new TrigramTrainer(is, true, lex, gram);
+		tt.train();
+		is.close();
+		System.out.println(lex);
+		System.out.println(gram);
+
+		ByteArrayInputStream lexIn = new ByteArrayInputStream(lex.toByteArray());
+		ByteArrayInputStream gramIn = new ByteArrayInputStream(gram.toByteArray());
+
+		String testSent = "A\nB\nE\nB\nC";
+
+		NGrams ng = new NGrams(gramIn, true);
+		PosEmissions em = new PosEmissions(lexIn, true);
+		ByteArrayInputStream testIn = new ByteArrayInputStream(testSent.getBytes());
+		ByteArrayOutputStream test = new ByteArrayOutputStream();
+		
+		AbstractDecoder td =new NGramDecoder(3, testIn, test, ng, em); 
+		td.decode();
+		System.out.println(test);
+	}
+
+	public void tNgram() throws FileNotFoundException, IOException, ParseException {
+		// InputStream is=Utils.getStream(this, "bigram-test.train");
+		// ByteArrayOutputStream lex=new ByteArrayOutputStream();
+		// ByteArrayOutputStream gram=new ByteArrayOutputStream();
+		// TrigramTrainer t=new TrigramTrainer(is, false, lex, gram);
+		// t.train();
+		//
+		// System.out.println(lex);
+		// System.out.println("___");
+		// System.out.println(gram);
+		InputStream is = Utils.getStream(this, "trigram-s-test.test");
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		NGramDecoder nd = new NGramDecoder(3, is, out, new NGrams(Utils.getStream(this, "trigram-s-test.gram"), true),
+				new PosEmissions(Utils.getStream(this, "trigram-s-test.lex"), true));
+//		TrigramDecoder tg = new TrigramDecoder(is, out, new NGrams(Utils.getStream(this, "trigram-s-test.gram"), true),
+//				new PosEmissions(Utils.getStream(this, "trigram-s-test.lex"), true));
+		nd.decode();
 		is.close();
 		System.out.println(out);
 
